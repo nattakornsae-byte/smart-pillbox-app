@@ -4,8 +4,9 @@
  * ผู้ดูแลจะพิมพ์อีเมลและรหัสผ่านของตัวเองตอนเข้าสู่ระบบ
  */
 window.APP_CONFIG = {
-  // ที่อยู่ ThingsBoard ที่ใช้ในแล็บ
-  TB_HOST: 'https://demo.thingsboard.io',
+  // ที่อยู่ ThingsBoard ของกลุ่ม (บัญชีอยู่บน ThingsBoard Cloud)
+  // ถ้าบัญชีอยู่เซิร์ฟเวอร์ยุโรป ใช้ 'https://eu.thingsboard.cloud'
+  TB_HOST: 'https://thingsboard.cloud',
 
   // ชื่อ device ของตู้ยาใน ThingsBoard
   // เว้นว่างไว้ = ใช้ตู้แรกที่บัญชีนี้มองเห็น
