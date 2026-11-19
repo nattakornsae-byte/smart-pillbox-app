@@ -28,7 +28,7 @@ window.APP_CONFIG = {
   var LABELS = { morning: 'มื้อเช้า', noon: 'มื้อกลางวัน', evening: 'มื้อเย็น', bedtime: 'ก่อนนอน' };
   var SHORT = { morning: 'เช้า', noon: 'กลางวัน', evening: 'เย็น', bedtime: 'ก่อนนอน' };
 
-  /* ---------- ฟังก์ชันกลาง ใช้ทั้งโหมดจริงและโหมดตัวอย่าง ---------- */
+  /* ---------- ฟังก์ชันกลาง ---------- */
 
   function startOfDay(d) {
     var x = new Date(d);
@@ -124,7 +124,6 @@ window.APP_CONFIG = {
   /* ---------- โหมดจริง: ThingsBoard ---------- */
 
   var TBApi = {
-    isDemo: false,
     _user: null,
     _device: null,
 
@@ -411,123 +410,6 @@ window.APP_CONFIG = {
 })();
 
 /*
- * โหมดตัวอย่าง: ข้อมูลจำลองในเบราว์เซอร์ ไม่ต่อ ThingsBoard
- * ใช้ทดลองหน้าเว็บก่อนบอร์ดจริงพร้อม ข้อมูลหายเมื่อปิดหน้า
- */
-(function () {
-  'use strict';
-
-  var D = window.PillboxData;
-  var MIN = 60000;
-  var DAY = 24 * 60 * MIN;
-
-  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-
-  function at(dayStart, hhmm, plusMin) {
-    var p = hhmm.split(':');
-    return dayStart + (Number(p[0]) * 60 + Number(p[1]) + (plusMin || 0)) * MIN;
-  }
-
-  var schedule = {
-    morning: { time: '08:00', med: '' },
-    noon: { time: '12:00', med: '' },
-    evening: { time: '18:00', med: '' },
-    bedtime: { time: '21:00', med: '' }
-  };
-
-  // ผลย้อนหลัง 29 วัน + วันนี้ (มื้อที่ลืมกำหนดไว้ตายตัว ตัวเลขสถิติจึงคงที่)
-  var missed = { 1: 'noon', 2: 'evening', 3: 'bedtime', 5: 'noon', 9: 'noon', 12: 'evening',
-    15: 'noon', 18: 'bedtime', 21: 'noon', 25: 'evening', 27: 'noon', 29: 'bedtime' };
-
-  function buildRecords() {
-    var today = D.startOfDay(Date.now());
-    var out = [];
-    for (var d = 29; d >= 1; d--) {
-      var start = today - d * DAY;
-      D.MEALS.forEach(function (k, i) {
-        if (missed[d] === k) {
-          out.push({ ts: at(start, schedule[k].time, 45), meal: k, dose: 'missed', reminders: 3 });
-        } else {
-          var off = ((d * 7 + i * 5) % 25) + 1;
-          out.push({ ts: at(start, schedule[k].time, off), meal: k, dose: 'taken', reminders: off > 15 ? 2 : 1 });
-        }
-      });
-    }
-    [['morning', '08:12', 'taken', 1], ['noon', '12:45', 'missed', 3],
-      ['evening', '18:09', 'taken', 1], ['bedtime', '21:07', 'taken', 1]].forEach(function (r) {
-      var ts = at(today, r[1], 0);
-      if (ts <= Date.now()) out.push({ ts: ts, meal: r[0], dose: r[2], reminders: r[3] });
-    });
-    return out;
-  }
-
-  var records = buildRecords();
-  var sos = { id: 'demo-sos', createdTime: Date.now() - 6 * MIN };
-  var received = D.startOfDay(Date.now()) - DAY + (20 * 60 + 15) * MIN;
-  var profile = { fullName: 'ผู้ดูแล (ตัวอย่าง)', phone: '', email: 'demo@example.com' };
-
-  window.DemoApi = {
-    isDemo: true,
-    ready: function () { return true; },
-    logout: function () { /* nothing to clear */ },
-
-    getStatus: async function () {
-      await wait(120);
-      return { name: 'ผู้สูงอายุ (ตัวอย่าง)', online: true, last: Date.now() - 2 * MIN };
-    },
-
-    getToday: async function () {
-      await wait(120);
-      return D.buildToday(schedule, records);
-    },
-
-    getRecords: async function (fromTs, toTs) {
-      await wait(150);
-      return records.filter(function (r) { return r.ts >= fromTs && r.ts <= toTs; });
-    },
-
-    getSchedule: async function () {
-      await wait(120);
-      return { schedule: JSON.parse(JSON.stringify(schedule)), savedTs: received - 5 * MIN, received: received, online: true };
-    },
-
-    saveSchedule: async function (s) {
-      await wait(300);
-      schedule = JSON.parse(JSON.stringify(s));
-    },
-
-    getSos: async function () {
-      await wait(120);
-      return sos;
-    },
-
-    ackSos: async function () {
-      await wait(300);
-      sos = null;
-      return { ackTs: Date.now(), warn: null };
-    },
-
-    getProfile: async function () {
-      await wait(100);
-      return Object.assign({}, profile);
-    },
-
-    saveProfile: async function (p) {
-      await wait(250);
-      profile.fullName = p.fullName;
-      profile.phone = p.phone;
-    },
-
-    changePassword: async function () {
-      await wait(250);
-    },
-
-    subscribe: function () { /* โหมดตัวอย่างไม่มีข้อมูลสด */ },
-    unsubscribe: function () { /* nothing */ }
-  };
-})();
-
-/*
  * หน้าเว็บผู้ดูแล Smart Pillbox (Single Page App แบบ hash route ใช้บน GitHub Pages ได้)
  * หน้า: #/login #/home #/schedule #/history #/stats #/emergency #/profile
  */
@@ -540,15 +422,7 @@ window.APP_CONFIG = {
   var $app = document.getElementById('app');
   var $toast = document.getElementById('toast');
 
-  function session(k, v) {
-    try {
-      if (v === undefined) return sessionStorage.getItem(k);
-      if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v);
-    } catch (e) { return null; }
-    return null;
-  }
-
-  var api = session('pb_demo') === '1' ? window.DemoApi : window.TBApi;
+  var api = window.TBApi;
 
   /* ---------- ไอคอนและตัวช่วย ---------- */
 
@@ -614,7 +488,6 @@ window.APP_CONFIG = {
 
   function shell(main, tab) {
     return '<header class="topbar">' + logo(36) + '<span class="brand">Smart Pillbox</span>' +
-      (api.isDemo ? '<span class="demo-badge">ข้อมูลตัวอย่าง</span>' : '') +
       '<a class="icon-btn" href="#/profile" aria-label="ข้อมูลส่วนตัว">' + icon('user') + '</a></header>' +
       '<main class="content">' + main + '</main>' + nav(tab);
   }
@@ -643,7 +516,6 @@ window.APP_CONFIG = {
       '<input class="input" id="password" type="password" autocomplete="current-password" required>' +
       '<p class="alert" id="loginErr" role="alert" hidden></p>' +
       '<button class="btn primary" type="submit">เข้าสู่ระบบ</button></form>' +
-      '<button class="btn ghost" id="demoBtn" type="button">ดูตัวอย่างด้วยข้อมูลจำลอง</button>' +
       '<p class="muted center">ยังไม่มีบัญชี ติดต่อผู้ดูแลระบบ</p></div>';
 
     var form = byId('loginForm');
@@ -658,9 +530,7 @@ window.APP_CONFIG = {
       btn.textContent = 'กำลังเข้าสู่ระบบ…';
       err.hidden = true;
       try {
-        await window.TBApi.login(email, pw);
-        session('pb_demo', null);
-        api = window.TBApi;
+        await api.login(email, pw);
         startLive();
         go('home');
       } catch (e) {
@@ -669,12 +539,6 @@ window.APP_CONFIG = {
         btn.disabled = false;
         btn.textContent = 'เข้าสู่ระบบ';
       }
-    });
-    byId('demoBtn').addEventListener('click', function () {
-      stopLive();
-      session('pb_demo', '1');
-      api = window.DemoApi;
-      go('home');
     });
   }
 
@@ -1042,8 +906,6 @@ window.APP_CONFIG = {
     byId('logoutBtn').addEventListener('click', function () {
       stopLive();
       api.logout();
-      session('pb_demo', null);
-      api = window.TBApi;
       go('login');
     });
   }
@@ -1101,7 +963,7 @@ window.APP_CONFIG = {
   }
 
   function startLive() {
-    if (api.isDemo || !api.ready()) return;
+    if (!api.ready()) return;
     stopLive();
     api.subscribe(function () {
       clearTimeout(liveTimer);

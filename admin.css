@@ -1,0 +1,192 @@
+/* หลังบ้าน Smart Pillbox – โทนเดียวกับหน้าบ้าน (ครีม + กรมท่า) */
+:root {
+  --cream: #F6EFE2; --card: #FFFCF6; --line: #E4DACA; --field: #CFC5B3;
+  --navy: #1E2C55; --navy-soft: #E3E7F1; --ink: #16213F; --muted: #5A6072;
+  --green: #17663D; --green-bg: #DCEFE3; --orange: #9A3F07; --orange-bg: #FBE3CF;
+  --red: #B3261E; --red-bg: #F9DEDC; --red-line: #E7A49F; --gray: #4F5562; --gray-bg: #ECE8E1;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--cream); color: var(--ink); }
+body {
+  font-family: 'IBM Plex Sans Thai', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-family: 'Prompt', 'IBM Plex Sans Thai', sans-serif; font-size: 26px; font-weight: 600; }
+h2 { font-size: 18px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+a { color: var(--navy); }
+button, input, select { font: inherit; }
+[hidden] { display: none !important; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.text-orange { color: var(--orange); font-weight: 600; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.loading { color: var(--muted); padding: 32px 0; text-align: center; }
+
+/* โครงหน้า: เมนูซ้าย + เนื้อหา */
+.layout {
+  display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; min-height: 100dvh;
+  background: linear-gradient(to right, var(--navy) 248px, transparent 248px);
+}
+.side {
+  position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 20px;
+  padding: 20px 14px; background: var(--navy); color: #FFFFFF;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
+.brand strong { display: block; font-family: 'Prompt', sans-serif; font-size: 18px; font-weight: 600; }
+.brand span { display: block; font-size: 13px; color: #C9D1E6; }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border-radius: 10px;
+  color: #DCE2F0; text-decoration: none; font-weight: 500;
+}
+.nav a:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
+.nav a[aria-current="page"] { background: #FFFFFF; color: var(--navy); font-weight: 700; }
+.side-out {
+  margin-top: auto; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 10px; background: transparent; color: #FFFFFF; cursor: pointer;
+}
+.main { min-width: 0; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head p { margin-top: 2px; }
+
+/* การ์ด ตัวเลขสรุป และตาราง */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.tile strong { font-family: 'Prompt', sans-serif; font-size: 34px; font-weight: 600; line-height: 1.15; }
+.tile-label { font-size: 14px; font-weight: 600; color: var(--muted); }
+.tile-sub { font-size: 13px; color: var(--muted); }
+.tile.red { border-color: var(--red-line); background: var(--red-bg); }
+.tile.red strong { color: var(--red); }
+.tile.orange { border-color: #E8A774; background: var(--orange-bg); }
+.tile.orange strong { color: var(--orange); }
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th {
+  text-align: left; font-size: 13px; font-weight: 700; color: var(--muted);
+  padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table td.actions { white-space: nowrap; text-align: right; }
+.table td.actions .btn + .btn { margin-left: 6px; }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.list li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.badge.green { background: var(--green-bg); color: var(--green); }
+.badge.gray { background: var(--gray-bg); color: var(--gray); }
+.badge.orange { background: var(--orange-bg); color: var(--orange); }
+.badge.red { background: var(--red-bg); color: var(--red); }
+.badge.navy { background: var(--navy-soft); color: var(--navy); }
+.empty { text-align: center; color: var(--muted); align-items: center; }
+
+/* ปุ่มและฟอร์ม */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px;
+  border-radius: 10px; border: 1px solid var(--field); background: var(--card); color: var(--navy);
+  font-weight: 700; text-decoration: none; cursor: pointer;
+}
+.btn:disabled { opacity: 0.55; cursor: default; }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: #FFFFFF; }
+.btn.danger { color: var(--red); border-color: var(--red-line); }
+.btn.armed { background: var(--red); border-color: var(--red); color: #FFFFFF; }
+.btn.ghost { border-color: transparent; background: transparent; text-decoration: underline; }
+.btn.small { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.input {
+  width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--field); border-radius: 10px;
+  background: #FFFFFF; color: var(--ink); font-size: 16px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field span { font-size: 14px; font-weight: 600; }
+.fields { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.fields .field { flex: 1 1 200px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
+.form-grid .check, .form-grid .alert, .form-grid .btn { grid-column: 1 / -1; justify-self: start; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.check input { width: 18px; height: 18px; }
+.inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.inline .input { flex: 1 1 220px; width: auto; min-width: 0; max-width: 420px; }
+select.input { text-overflow: ellipsis; }
+.alert { padding: 10px 12px; border-radius: 10px; background: var(--orange-bg); color: var(--orange); font-weight: 600; font-size: 15px; }
+.note { padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 15px; }
+.note.info { background: var(--navy-soft); color: var(--navy); }
+.note.warn { background: var(--orange-bg); color: var(--orange); }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--field);
+  background: var(--card); color: var(--navy); font-weight: 600; cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #FFFFFF; }
+.input:focus, .btn:focus-visible, .chip:focus-visible, .nav a:focus-visible, .side-out:focus-visible, summary:focus-visible {
+  outline: 3px solid #6B8BD6; outline-offset: 2px;
+}
+
+/* ผู้สูงอายุ ผู้ดูแล และกล่องคัดลอก */
+.cols { display: flex; flex-direction: column; gap: 14px; }
+.cols > div { min-width: 0; }
+.cols > div + div { border-top: 1px solid var(--line); padding-top: 14px; }
+details.sub { margin-top: 10px; }
+details.sub summary { cursor: pointer; font-weight: 700; color: var(--navy); min-height: 40px; display: flex; align-items: center; }
+details.sub form { margin-top: 8px; }
+.token-box { background: var(--navy-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.copy-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.copy-row code {
+  flex: 1 1 240px; min-width: 0; padding: 8px 10px; border-radius: 8px;
+  background: #FFFFFF; border: 1px solid var(--line); overflow-wrap: anywhere;
+}
+.steps { margin: 0; padding-left: 20px; font-size: 15px; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+
+/* หน้าเข้าสู่ระบบ */
+.center-wrap { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+.auth { width: 100%; max-width: 420px; gap: 8px; padding: 26px 24px; }
+.auth label { font-weight: 600; margin-top: 6px; }
+.auth .btn.primary { margin-top: 10px; }
+.auth-head { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; margin-bottom: 8px; }
+
+/* ข้อความแจ้งชั่วคราว */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20;
+  width: max-content; max-width: calc(100% - 32px); padding: 12px 16px; border-radius: 12px;
+  background: var(--ink); color: #FFFFFF; font-weight: 600; text-align: center;
+}
+.toast.ok { background: var(--green); }
+.toast.err { background: var(--red); }
+
+/* แท็บเล็ตและมือถือ: เมนูย้ายไปด้านบน */
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); background: none; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 16px; }
+  .brand { flex: 1; padding: 0; }
+  .side-out { margin-top: 0; min-height: 40px; }
+  .nav { order: 3; width: 100%; flex-direction: row; overflow-x: auto; gap: 6px; scrollbar-width: none; }
+  .nav a { flex: 0 0 auto; min-height: 40px; padding: 6px 12px; }
+  .main { padding: 18px 16px 40px; }
+  .inline .input { max-width: none; }
+}
+
+/* มือถือ: ตารางเปลี่ยนเป็นการ์ดทีละแถว */
+@media (max-width: 640px) {
+  h1 { font-size: 22px; }
+  .card { padding: 16px; }
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .table tr:last-child { border-bottom: none; }
+  .table td { border: none; padding: 3px 0; display: flex; gap: 10px; }
+  .table td::before { content: attr(data-label); flex: 0 0 104px; color: var(--muted); font-size: 13px; font-weight: 600; }
+  .table td.actions { text-align: left; white-space: normal; flex-wrap: wrap; gap: 6px; padding-top: 8px; }
+  .table td.actions::before { content: none; }
+  .table td.actions .btn + .btn { margin-left: 0; }
+}
