@@ -195,3 +195,6 @@ details[open] summary svg { transform: rotate(90deg); }
 }
 .toast.ok { background: var(--green); }
 .toast.err { background: var(--orange); }
+/* ปุ่มเพิ่มเพื่อน LINE */
+.btn.line { background: #00873C; color: #FFFFFF; }
+.line-card { display: flex; flex-direction: column; gap: 10px; }
